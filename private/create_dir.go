@@ -15,6 +15,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/JJApplication/fushin/pkg"
 	"github.com/JJApplication/fushin/utils/json"
 )
 
@@ -25,7 +26,7 @@ func createTag(projectName, Type, DataType string, protocol []string) {
 	fmt.Println("start to create project meta")
 	data, err := json.Json.MarshalIndent(map[string]interface{}{
 		"create":    time.Now(),
-		"generator": "Fushin",
+		"generator": pkg.Fushin,
 		"project":   projectName,
 		"type":      Type,
 		"metaType":  DataType,

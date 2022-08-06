@@ -5,7 +5,7 @@ Github: https://github.com/landers1037
 Copyright Renj
 */
 
-// Package internal
+// Package private
 package private
 
 import (
