@@ -11,8 +11,8 @@ package private
 import (
 	"fmt"
 	"log"
-	"os"
 
+	"github.com/JJApplication/fushin/pkg"
 	"github.com/gookit/color"
 )
 
@@ -22,22 +22,14 @@ import (
 type ilog struct {
 	Prefix string
 	Flag   int
-	Mode   string
-	Color  string
 }
 
 var Log ilog
-var logMode string
 
 func init() {
-	logMode = os.Getenv("FushinMode")
-	// 彩色输出
-	logColor := os.Getenv("FushinLogColor")
 	Log = ilog{
-		Prefix: "[Fushin] ",
+		Prefix: fmt.Sprintf("[%s] ", pkg.Fushin),
 		Flag:   log.LstdFlags,
-		Mode:   logMode,
-		Color:  logColor,
 	}
 	Log.init()
 }
@@ -48,49 +40,49 @@ func (l *ilog) init() {
 }
 
 func (l *ilog) Info(v ...interface{}) {
-	if l.Mode == "" || l.Mode == "development" {
-		log.Println(append([]interface{}{fmt.Sprintf("%s ", l.colored("[INFO]"))}, v...)...)
+	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
+		log.Println(append([]interface{}{fmt.Sprintf("%s", l.colored("INFO"))}, v...)...)
 	}
 }
 
 func (l *ilog) InfoF(fmtStr string, v ...interface{}) {
-	if l.Mode == "" || l.Mode == "development" {
-		log.Print(fmt.Sprintf("%s ", l.colored("[INFO]")), fmt.Sprintf(fmtStr, v...))
+	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
+		log.Printf("%s %s", l.colored("INFO"), fmt.Sprintf(fmtStr, v...))
 	}
 }
 
 func (l *ilog) Warn(v ...interface{}) {
-	if l.Mode == "" || l.Mode == "development" {
-		log.Println(append([]interface{}{fmt.Sprintf("%s ", l.colored("[WARN]"))}, v...)...)
+	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
+		log.Println(append([]interface{}{fmt.Sprintf("%s", l.colored("WARN"))}, v...)...)
 	}
 }
 
 func (l *ilog) WarnF(fmtStr string, v ...interface{}) {
-	if l.Mode == "" || l.Mode == "development" {
-		log.Print(fmt.Sprintf("%s ", l.colored("[WARN]")), fmt.Sprintf(fmtStr, v...))
+	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
+		log.Printf("%s %s", l.colored("WARN"), fmt.Sprintf(fmtStr, v...))
 	}
 }
 
 func (l *ilog) Error(v ...interface{}) {
-	if l.Mode == "" || l.Mode == "development" {
-		log.Println(append([]interface{}{fmt.Sprintf("%s ", l.colored("[ERRO]"))}, v...)...)
+	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
+		log.Println(append([]interface{}{fmt.Sprintf("%s", l.colored("ERRO"))}, v...)...)
 	}
 }
 
 func (l *ilog) ErrorF(fmtStr string, v ...interface{}) {
-	if l.Mode == "" || l.Mode == "development" {
-		log.Print(fmt.Sprintf("%s ", l.colored("[ERRO]")), fmt.Sprintf(fmtStr, v...))
+	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
+		log.Printf("%s %s", l.colored("ERRO"), fmt.Sprintf(fmtStr, v...))
 	}
 }
 
 func (l *ilog) colored(s string) string {
-	if l.Color == "" || l.Color == "true" || l.Color == "True" {
+	if pkg.FushinLogColor == "" || pkg.FushinLogColor == "true" || pkg.FushinLogColor == "True" {
 		switch s {
-		case "[INFO]":
+		case "INFO":
 			return color.BgBlue.Sprint(s)
-		case "[WARN]":
+		case "WARN":
 			return color.BgYellow.Sprint(s)
-		case "[ERRO]":
+		case "ERRO":
 			return color.BgRed.Sprint(s)
 		default:
 			return s
