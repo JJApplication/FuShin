@@ -7,6 +7,14 @@ FuShin Stone
 
 或者使用`go module`Fushin搭建一个JJApplication
 
+## 安装
+```bash
+// need at least go1.17
+$ go get github.com/JJApplication/fushin
+// or
+$ go install github.com/JJApplication/fushin
+```
+
 ## 微服务类型
 在JJApplication中支持以下服务类型
 - web
