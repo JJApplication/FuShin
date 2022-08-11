@@ -21,9 +21,6 @@ import (
 )
 
 // 连接
-const (
-	moduleName = "<UDSServer>"
-)
 
 type UDSServer struct {
 	Name      string            // 注册服务的名称

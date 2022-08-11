@@ -58,8 +58,3 @@ func Response(c net.Conn, res Res) error {
 	_, err = c.Write(data)
 	return err
 }
-
-// ModuleName 模块名称
-func ModuleName() string {
-	return moduleName
-}

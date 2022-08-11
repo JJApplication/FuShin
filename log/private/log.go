@@ -76,7 +76,7 @@ func (l *ilog) ErrorF(fmtStr string, v ...interface{}) {
 }
 
 func (l *ilog) colored(s string) string {
-	if pkg.FushinLogColor == "" || pkg.FushinLogColor == "true" || pkg.FushinLogColor == "True" {
+	if pkg.FushinLogColor {
 		switch s {
 		case "INFO":
 			return color.BgBlue.Sprint(s)

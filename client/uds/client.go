@@ -17,8 +17,9 @@ import (
 )
 
 type UDSClient struct {
-	Addr string
-	conn net.Conn
+	Addr        string
+	conn        net.Conn
+	MaxRecvSize int
 }
 
 const MaxReadSize = 4096
@@ -70,7 +71,7 @@ func (c *UDSClient) SendWithRes(req uds.Req) (res uds.Res, err error) {
 		return uds.Res{}, err
 	}
 	_, err = c.conn.Write(data)
-	var buf = make([]byte, MaxReadSize)
+	var buf = make([]byte, maxSize(c.MaxRecvSize))
 	count, err := c.conn.Read(buf)
 	if err != nil {
 		return uds.Res{}, err
@@ -93,4 +94,11 @@ func (c *UDSClient) SendRawWithRes(data string) ([]byte, error) {
 
 func (c *UDSClient) Close() error {
 	return c.conn.Close()
+}
+
+func maxSize(size int) int {
+	if size <= 0 {
+		return MaxReadSize
+	}
+	return size
 }
