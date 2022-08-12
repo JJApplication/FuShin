@@ -20,6 +20,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,6 +41,7 @@ type Server struct {
 	WriteTimeout int               // 继承http.Server
 	IdleTimeout  int               // 继承http.Server
 	// todo tls
+	PProf bool // 是否开启pprof 路径为"debug/pprof"
 }
 
 type Address struct {
@@ -79,6 +81,9 @@ func (s *Server) Init() {
 	if s.engine == nil {
 		s.engine = gin.New()
 		s.engine.Use(gin.Recovery())
+	}
+	if s.PProf {
+		pprof.Register(s.engine)
 	}
 	s.router = make(map[string]Router, 1)
 	s.wrapper = make([]Wrapper, 0)

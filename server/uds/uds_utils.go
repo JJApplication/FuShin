@@ -58,3 +58,13 @@ func Response(c net.Conn, res Res) error {
 	_, err = c.Write(data)
 	return err
 }
+
+// ResponseAny 响应任意数据
+func ResponseAny(c net.Conn, res interface{}) error {
+	data, err := json.Json.Marshal(res)
+	if err != nil {
+		return err
+	}
+	_, err = c.Write(data)
+	return err
+}

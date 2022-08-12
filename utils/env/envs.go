@@ -5,7 +5,7 @@ Github: https://github.com/landers1037
 Copyright Renj
 */
 
-// Package utils
+// Package env
 package env
 
 import (

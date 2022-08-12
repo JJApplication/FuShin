@@ -32,18 +32,18 @@ type UDSServer struct {
 }
 
 // New 返回全新的unix server
-func New(name string) UDSServer {
-	return UDSServer{
+func New(name string) *UDSServer {
+	return &UDSServer{
 		Name:      name,
-		Option:    Option{},
+		Option:    Option{MaxSize: 1 << 10},
 		Logger:    nil,
 		closeFlag: make(chan int),
 	}
 }
 
 // NewWithOption 返回自定义的unix server
-func NewWithOption(name string, o Option, l Logger) UDSServer {
-	return UDSServer{
+func NewWithOption(name string, o Option, l Logger) *UDSServer {
+	return &UDSServer{
 		Name:      name,
 		Option:    o,
 		Logger:    l,
@@ -52,8 +52,8 @@ func NewWithOption(name string, o Option, l Logger) UDSServer {
 }
 
 // Default 返回默认的unix server
-func Default(name string) UDSServer {
-	return UDSServer{
+func Default(name string) *UDSServer {
+	return &UDSServer{
 		Name:      name,
 		Option:    DefaultOption,
 		Logger:    nil,
@@ -63,6 +63,9 @@ func Default(name string) UDSServer {
 
 // Listen 在协程启动监听
 func (u *UDSServer) Listen() error {
+	if u.Option.MaxSize <= 0 {
+		u.error(moduleName, "uds server request maxsize not set")
+	}
 	addr, err := net.ResolveUnixAddr("unix", GetSocket(u.Name))
 	if err != nil {
 		u.errorF("%s resolve unix address error: %s\n", moduleName, err.Error())
@@ -121,7 +124,7 @@ func (u *UDSServer) Run(c net.Conn) {
 		}
 
 		// 开发模式下打印报文
-		u.infoF("%s message [%s] received\n", moduleName, buf[:count])
+		u.infoF("%s message [%s] received\n", moduleName, strings.TrimSuffix(string(buf[:count]), "\n"))
 		reqBody := u.Option.RequestFormat
 		err = json.Json.Unmarshal(buf[:count], &reqBody)
 		if err != nil {
@@ -130,7 +133,7 @@ func (u *UDSServer) Run(c net.Conn) {
 		}
 		// 匹配操作
 		if f, ok := u.funcs[reqBody.Operation]; ok {
-			f(c, reqBody)
+			f(&UDSContext{c: c, operation: reqBody.Operation}, reqBody)
 		} else {
 			u.warnF("%s unsupported operation [%s]\n", moduleName, reqBody.Operation)
 			Response(c, Res{
@@ -149,12 +152,14 @@ func (u *UDSServer) Run(c net.Conn) {
 // 响应会以注册的format格式化
 // 针对不同的处理可以注册多个func处理请求
 // operation为请求中的操作关键字 用于匹配func
-func (u *UDSServer) AddFunc(operation string, f func(c net.Conn, req Req)) {
+func (u *UDSServer) AddFunc(operation string, f func(c *UDSContext, req Req)) {
+	// insert operation name
 	if u.funcs == nil {
 		u.funcs = make(Funcs, 1)
 	}
 	if operation != "" {
 		u.funcs[operation] = f
+
 	} else {
 		u.error(moduleName, "addFunc operation is empty")
 	}

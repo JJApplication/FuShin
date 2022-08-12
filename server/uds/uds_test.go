@@ -10,7 +10,6 @@ package uds
 
 import (
 	"context"
-	"net"
 	"testing"
 	"time"
 )
@@ -27,9 +26,9 @@ func TestNewUDSServerExit(t *testing.T) {
 
 func TestNewUDSServer(t *testing.T) {
 	server := Default("/tmp/Test")
-	server.AddFunc("op1", func(c net.Conn, req Req) {
+	server.AddFunc("op1", func(c *UDSContext, req Req) {
 		t.Logf("rec %+v", req)
-		err := Response(c, Res{
+		err := Response(c.c, Res{
 			Error: "",
 			Data:  "Hello World",
 			From:  "",

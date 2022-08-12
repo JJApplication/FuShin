@@ -28,4 +28,6 @@ type Req struct {
 	To        []string `json:"to,omitempty"` // 可以有多个接收者
 }
 
-type Funcs map[string]func(c net.Conn, req Req)
+type FuncRaw func(c net.Conn, req Req)
+type Func func(c *UDSContext, req Req)
+type Funcs map[string]Func
