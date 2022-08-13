@@ -8,9 +8,11 @@ Copyright Renj
 // Package cron
 package cron
 
-import (
-	"github.com/robfig/cron/v3"
+const (
+	moduleName = "<CronJob>"
 )
 
-// Cron 对外暴露的原生cron对象
-var Cron cron.Cron
+// ModuleName 模块名称
+func ModuleName() string {
+	return moduleName
+}

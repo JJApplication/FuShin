@@ -16,17 +16,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/JJApplication/fushin/log/private"
+	"github.com/JJApplication/fushin/log"
 	"github.com/JJApplication/fushin/utils/json"
 )
 
 // 连接
 
 type UDSServer struct {
-	Name      string            // 注册服务的名称
-	Option    Option            // 默认使用fushin option
-	Logger    Logger            // 默认使用fushin logger
-	listener  *net.UnixListener // 内部的listener
+	Name      string              // 注册服务的名称
+	Option    Option              // 默认使用fushin option
+	Logger    log.LoggerInterface // 默认使用fushin logger
+	listener  *net.UnixListener   // 内部的listener
 	closeFlag chan int
 	funcs     Funcs // 注册的操作
 }
@@ -42,7 +42,7 @@ func New(name string) *UDSServer {
 }
 
 // NewWithOption 返回自定义的unix server
-func NewWithOption(name string, o Option, l Logger) *UDSServer {
+func NewWithOption(name string, o Option, l log.LoggerInterface) *UDSServer {
 	return &UDSServer{
 		Name:      name,
 		Option:    o,
@@ -68,12 +68,12 @@ func (u *UDSServer) Listen() error {
 	}
 	addr, err := net.ResolveUnixAddr("unix", GetSocket(u.Name))
 	if err != nil {
-		u.errorF("%s resolve unix address error: %s\n", moduleName, err.Error())
+		u.errorF("%s resolve unix address error: %s", moduleName, err.Error())
 		return err
 	}
 	listener, err := net.ListenUnix("unix", addr)
 	if err != nil {
-		u.errorF("%s listen on unix address [%s] error: %s\n", moduleName, addr, err.Error())
+		u.errorF("%s listen on unix address [%s] error: %s", moduleName, addr, err.Error())
 		return err
 	}
 
@@ -86,7 +86,7 @@ func (u *UDSServer) Listen() error {
 			break
 		}
 		if err != nil {
-			u.errorF("%s unix accept error: %s\n", moduleName, err.Error())
+			u.errorF("%s unix accept error: %s", moduleName, err.Error())
 			continue
 		}
 		go u.Run(conn)
@@ -100,7 +100,7 @@ func (u *UDSServer) Run(c net.Conn) {
 	if u.Option.AutoRecover {
 		defer func() {
 			if err := recover(); err != nil {
-				u.errorF("%s recover from uds server run: %v\n", moduleName, err)
+				u.errorF("%s [recover] from uds server: %v", moduleName, err)
 			}
 		}()
 	}
@@ -115,7 +115,7 @@ func (u *UDSServer) Run(c net.Conn) {
 				u.errorF("%s read from uds client, client disconnected", moduleName)
 				break
 			}
-			u.errorF("%s read from uds client error: %s\n", moduleName, err.Error())
+			u.errorF("%s read from uds client error: %s", moduleName, err.Error())
 			continue
 		}
 		if count <= 1 {
@@ -124,24 +124,24 @@ func (u *UDSServer) Run(c net.Conn) {
 		}
 
 		// 开发模式下打印报文
-		u.infoF("%s message [%s] received\n", moduleName, strings.TrimSuffix(string(buf[:count]), "\n"))
+		u.infoF("%s message [%s] received", moduleName, strings.TrimSuffix(string(buf[:count]), ""))
 		reqBody := u.Option.RequestFormat
 		err = json.Json.Unmarshal(buf[:count], &reqBody)
 		if err != nil {
-			u.errorF("%s decode request from client error: %s\n", moduleName, err.Error())
+			u.errorF("%s decode request from client error: %s", moduleName, err.Error())
 			continue
 		}
 		// 匹配操作
 		if f, ok := u.funcs[reqBody.Operation]; ok {
 			f(&UDSContext{c: c, operation: reqBody.Operation}, reqBody)
 		} else {
-			u.warnF("%s unsupported operation [%s]\n", moduleName, reqBody.Operation)
-			Response(c, Res{
+			u.warnF("%s unsupported operation [%s]", moduleName, reqBody.Operation)
+			u.warnF("%s server response with error: %v", moduleName, Response(c, Res{
 				Error: ErrUnsupportedOperation,
 				Data:  "",
 				From:  "",
 				To:    nil,
-			})
+			}))
 			continue
 		}
 	}
@@ -181,7 +181,7 @@ func (u *UDSServer) runtimeClosed() {
 			u.info(moduleName, "unix server close signal received")
 			u.info(moduleName, "unix server is closed")
 			close(u.closeFlag)
-			os.Exit(1)
+			os.Exit(0)
 		default:
 			if u.listener == nil {
 				u.info(moduleName, "unix server is closed")
@@ -200,71 +200,5 @@ func (u *UDSServer) AutoCheck() {
 		} else {
 			u.info(moduleName, "autoCheck unix listener is good")
 		}
-	}
-}
-
-func (u *UDSServer) info(v ...interface{}) {
-	if !u.Option.LogTrace {
-		return
-	}
-	if u.Logger != nil {
-		u.Logger.Info(v...)
-	} else {
-		private.Log.Info(v...)
-	}
-}
-
-func (u *UDSServer) infoF(fmt string, v ...interface{}) {
-	if !u.Option.LogTrace {
-		return
-	}
-	if u.Logger != nil {
-		u.Logger.InfoF(fmt, v...)
-	} else {
-		private.Log.InfoF(fmt, v...)
-	}
-}
-
-func (u *UDSServer) warn(v ...interface{}) {
-	if !u.Option.LogTrace {
-		return
-	}
-	if u.Logger != nil {
-		u.Logger.Warn(v...)
-	} else {
-		private.Log.Warn(v...)
-	}
-}
-
-func (u *UDSServer) warnF(fmt string, v ...interface{}) {
-	if !u.Option.LogTrace {
-		return
-	}
-	if u.Logger != nil {
-		u.Logger.WarnF(fmt, v...)
-	} else {
-		private.Log.WarnF(fmt, v...)
-	}
-}
-
-func (u *UDSServer) error(v ...interface{}) {
-	if !u.Option.LogTrace {
-		return
-	}
-	if u.Logger != nil {
-		u.Logger.Error(v...)
-	} else {
-		private.Log.Error(v...)
-	}
-}
-
-func (u *UDSServer) errorF(fmt string, v ...interface{}) {
-	if !u.Option.LogTrace {
-		return
-	}
-	if u.Logger != nil {
-		u.Logger.ErrorF(fmt, v...)
-	} else {
-		private.Log.ErrorF(fmt, v...)
 	}
 }

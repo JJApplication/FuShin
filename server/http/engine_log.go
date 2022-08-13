@@ -14,36 +14,60 @@ import (
 
 func (s *Server) info(v ...interface{}) {
 	if s.EnableLog {
-		private.Log.Info(v...)
+		if s.Logger == nil {
+			private.Log.Info(v...)
+		} else {
+			s.Logger.Info(v...)
+		}
 	}
 }
 
 func (s *Server) infoF(f string, v ...interface{}) {
 	if s.EnableLog {
-		private.Log.InfoF(f, v...)
+		if s.Logger == nil {
+			private.Log.InfoF(f, v...)
+		} else {
+			s.Logger.InfoF(f, v...)
+		}
 	}
 }
 
 func (s *Server) warn(v ...interface{}) {
 	if s.EnableLog {
-		private.Log.Warn(v...)
+		if s.Logger == nil {
+			private.Log.Warn(v...)
+		} else {
+			s.Logger.Warn(v...)
+		}
 	}
 }
 
 func (s *Server) warnF(f string, v ...interface{}) {
 	if s.EnableLog {
-		private.Log.WarnF(f, v...)
+		if s.Logger == nil {
+			private.Log.WarnF(f, v...)
+		} else {
+			s.Logger.WarnF(f, v...)
+		}
 	}
 }
 
 func (s *Server) error(v ...interface{}) {
 	if s.EnableLog {
-		private.Log.Error(v...)
+		if s.Logger == nil {
+			private.Log.Error(v...)
+		} else {
+			s.Logger.Error(v...)
+		}
 	}
 }
 
 func (s *Server) errorF(f string, v ...interface{}) {
 	if s.EnableLog {
-		private.Log.ErrorF(f, v...)
+		if s.Logger == nil {
+			private.Log.ErrorF(f, v...)
+		} else {
+			s.Logger.ErrorF(f, v...)
+		}
 	}
 }

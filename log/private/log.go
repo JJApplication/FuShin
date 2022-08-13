@@ -47,7 +47,7 @@ func (l *ilog) Info(v ...interface{}) {
 
 func (l *ilog) InfoF(fmtStr string, v ...interface{}) {
 	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
-		log.Printf("%s %s", l.colored("INFO"), fmt.Sprintf(fmtStr, v...))
+		log.Println(fmt.Sprintf("%s %s", l.colored("INFO"), fmt.Sprintf(fmtStr, v...)))
 	}
 }
 
@@ -59,7 +59,7 @@ func (l *ilog) Warn(v ...interface{}) {
 
 func (l *ilog) WarnF(fmtStr string, v ...interface{}) {
 	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
-		log.Printf("%s %s", l.colored("WARN"), fmt.Sprintf(fmtStr, v...))
+		log.Println(fmt.Sprintf("%s %s", l.colored("WARN"), fmt.Sprintf(fmtStr, v...)))
 	}
 }
 
@@ -71,7 +71,7 @@ func (l *ilog) Error(v ...interface{}) {
 
 func (l *ilog) ErrorF(fmtStr string, v ...interface{}) {
 	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
-		log.Printf("%s %s", l.colored("ERRO"), fmt.Sprintf(fmtStr, v...))
+		log.Println(fmt.Sprintf("%s %s", l.colored("ERRO"), fmt.Sprintf(fmtStr, v...)))
 	}
 }
 

@@ -20,26 +20,28 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/JJApplication/fushin/log"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	engine       *gin.Engine       // gin engine
-	mux          *sync.RWMutex     // 可重入的锁
-	wrapper      []Wrapper         // 中间件 顺序加载
-	router       map[string]Router // 路由
-	srv          *http.Server      // 内置的http.server
-	EnableLog    bool              // 使用内置的日志打印 默认输出到控制台
-	Debug        bool              // 开启gin的debug
-	RegSignal    []os.Signal       // 监听系统信号量
-	Address      Address           // 监听地址
-	Headers      map[string]string // 自定义的Headers
-	Copyright    string            // 版权所有 会以header: Copyright: xx的方式返回在响应中
-	MaxBodySize  int               // 最大请求体限制 默认1<<20 bytes
-	ReadTimeout  int               // 继承http.Server
-	WriteTimeout int               // 继承http.Server
-	IdleTimeout  int               // 继承http.Server
+	engine       *gin.Engine         // gin engine
+	mux          *sync.RWMutex       // 可重入的锁
+	wrapper      []Wrapper           // 中间件 顺序加载
+	router       map[string]Router   // 路由
+	srv          *http.Server        // 内置的http.server
+	EnableLog    bool                // 使用内置的日志打印 默认输出到控制台
+	Logger       log.LoggerInterface // 使用的日志记录器 默认为内置日志
+	Debug        bool                // 开启gin的debug
+	RegSignal    []os.Signal         // 监听系统信号量
+	Address      Address             // 监听地址
+	Headers      map[string]string   // 自定义的Headers
+	Copyright    string              // 版权所有 会以header: Copyright: xx的方式返回在响应中
+	MaxBodySize  int                 // 最大请求体限制 默认1<<20 bytes
+	ReadTimeout  int                 // 继承http.Server
+	WriteTimeout int                 // 继承http.Server
+	IdleTimeout  int                 // 继承http.Server
 	// todo tls
 	PProf bool // 是否开启pprof 路径为"debug/pprof"
 }
@@ -151,9 +153,9 @@ func (s *Server) ListenSmooth() {
 			if s.EnableLog {
 				fmt.Println()
 			}
-			s.infoF("%s signal %s received, server is closed\n", moduleName, sig.String())
+			s.infoF("%s signal %s received, server is closed", moduleName, sig.String())
 			if err := s.srv.Shutdown(context.Background()); err != nil {
-				s.errorF("%s server shutdown error: %s\n", moduleName, err.Error())
+				s.errorF("%s server shutdown error: %s", moduleName, err.Error())
 				return
 			}
 		}()
@@ -194,7 +196,7 @@ func (s *Server) RegSignals(sigs ...os.Signal) {
 // 初始化信号量
 func (s *Server) initRegSignals() {
 	for _, sig := range s.RegSignal {
-		s.infoF("%s signal [%s] registered\n", moduleName, sig.String())
+		s.infoF("%s signal [%s] registered", moduleName, sig.String())
 	}
 }
 
@@ -244,7 +246,7 @@ func (s *Server) Group(path string, wrap ...WrapperFunc) *RouterGroup {
 func (s *Server) Route(method, uri string, wrap ...WrapperFunc) {
 	s.mux.RLock()
 	if _, ok := s.router[method+uri]; ok {
-		s.errorF("%s route [%s] [%s] has already been registered\n", moduleName, method, uri)
+		s.errorF("%s route [%s] [%s] has already been registered", moduleName, method, uri)
 		return
 	}
 	s.router[method+uri] = Router{
