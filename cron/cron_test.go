@@ -45,3 +45,34 @@ func TestCronSpec(t *testing.T) {
 	time.Sleep(time.Second * 10)
 	cg.Stop()
 }
+
+func TestScheduleJob(t *testing.T) {
+	job := NewSchedule(time.Now().Add(time.Second*2), func() {
+		t.Log("test run at ", time.Now().String())
+	})
+
+	job.Start()
+
+	// 停止任务
+	job.Stop()
+	time.Sleep(1 * time.Second)
+	// 重启任务
+	job.ReStart()
+	time.Sleep(time.Second * 5)
+}
+
+func TestScheduleJobTimeout(t *testing.T) {
+	job := NewSchedule(time.Now().Add(time.Second*1), func() {
+		t.Log("test run at ", time.Now().String())
+	})
+
+	job.Start()
+
+	// 停止任务
+	time.Sleep(100)
+	job.Stop()
+	time.Sleep(5 * time.Second)
+	// 重启任务 此时计划任务处于过去式 不再执行
+	job.ReStart()
+	time.Sleep(time.Second * 10)
+}

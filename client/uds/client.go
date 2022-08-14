@@ -62,7 +62,8 @@ func (c *UDSClient) SendRaw(data string) error {
 }
 
 // SendWithRes 发送数据并尝试从服务端接收数据
-func (c *UDSClient) SendWithRes(req uds.Req) (res uds.Res, err error) {
+func (c *UDSClient) SendWithRes(req uds.Req) (uds.Res, error) {
+	var res uds.Res
 	if c.conn == nil {
 		return uds.Res{}, errors.New(ErrDialClosed)
 	}
@@ -80,7 +81,7 @@ func (c *UDSClient) SendWithRes(req uds.Req) (res uds.Res, err error) {
 		return uds.Res{}, err
 	}
 
-	return
+	return uds.Res{}, nil
 }
 
 // SendRawWithRes 发送raw数据并接收返回

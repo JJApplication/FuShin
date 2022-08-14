@@ -9,6 +9,7 @@ Copyright Renj
 package uds
 
 import (
+	"errors"
 	"io"
 	"net"
 	"os"
@@ -63,6 +64,9 @@ func Default(name string) *UDSServer {
 
 // Listen 在协程启动监听
 func (u *UDSServer) Listen() error {
+	if u.listener != nil {
+		return errors.New(ErrUdsAlreadyListen)
+	}
 	if u.Option.MaxSize <= 0 {
 		u.error(moduleName, "uds server request maxsize not set")
 	}
@@ -193,12 +197,14 @@ func (u *UDSServer) runtimeClosed() {
 }
 
 func (u *UDSServer) AutoCheck() {
-	c := time.Tick(time.Duration(u.Option.AutoCheckDuration) * time.Second)
-	for range c {
-		if u.listener == nil {
-			u.error(moduleName, "autoCheck unix listener is nil")
-		} else {
-			u.info(moduleName, "autoCheck unix listener is good")
+	if u.Option.AutoCheck {
+		c := time.Tick(time.Duration(u.Option.AutoCheckDuration) * time.Second)
+		for range c {
+			if u.listener == nil {
+				u.error(moduleName, "autoCheck unix listener is nil")
+			} else {
+				u.info(moduleName, "autoCheck unix listener is good")
+			}
 		}
 	}
 }

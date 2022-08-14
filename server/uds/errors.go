@@ -11,4 +11,5 @@ package uds
 const (
 	ErrUnsupportedOperation = "unsupported operation"
 	ErrUdsListenerNil       = "unix server listener is nil"
+	ErrUdsAlreadyListen     = "unix server already listened"
 )
