@@ -44,7 +44,7 @@ var DevOption = Option{
 
 var zapEncodeConfig = zapcore.EncoderConfig{
 	EncodeName:       nil,
-	ConsoleSeparator: "",
+	ConsoleSeparator: " ",
 	TimeKey:          "time",
 	LevelKey:         "level",
 	NameKey:          "name",

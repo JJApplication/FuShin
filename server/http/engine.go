@@ -104,7 +104,7 @@ func (s *Server) Init() {
 
 func (s *Server) Listen() error {
 	if s.engine == nil {
-		s.error(moduleName, ErrEngineEmpty)
+		s.errorF("%s %s", moduleName, ErrEngineEmpty)
 		return errors.New(ErrEngineEmpty)
 	} else {
 		s.srv.Addr = fmt.Sprintf("%s:%d", s.Address.Host, s.Address.Port)
@@ -131,7 +131,7 @@ func (s *Server) Run() {
 // 在注册监听signal的时候生效 默认注册CTRL+C
 func (s *Server) ListenSmooth() {
 	if s.engine == nil {
-		s.error(ErrEngineEmpty)
+		s.errorF("%s %s", moduleName, ErrEngineEmpty)
 		return
 	} else {
 		s.srv.Addr = fmt.Sprintf("%s:%d", s.Address.Host, s.Address.Port)
@@ -165,7 +165,7 @@ func (s *Server) ListenSmooth() {
 				s.info(moduleName, ErrServerClosed)
 				return
 			}
-			s.error(moduleName, err.Error())
+			s.errorF("%s %s", moduleName, err.Error())
 		}
 	}
 }
@@ -202,7 +202,7 @@ func (s *Server) initRegSignals() {
 
 // 初始化服务器配置
 func (s *Server) initServerConfig() {
-	s.info(moduleName, "server init success")
+	s.infoF("%s %s", moduleName, "server init success")
 	s.infoF("%s server will listen on %s:%d", moduleName, s.Address.Host, s.Address.Port)
 	s.infoF("%s server domain name is %v", moduleName, s.Address.Domain)
 	s.infoF("%s server debug: %v", moduleName, s.Debug)

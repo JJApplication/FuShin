@@ -5,13 +5,13 @@ FuShin Stone
 
 使用`fushin` 生成对应的微服务模板
 
-或者使用`go module`Fushin搭建一个JJApplication
+或者使用`go module` Fushin搭建一个JJApplication
 
 ## 安装
 ```bash
-// need at least go1.17
+# need at least go1.17
 $ go get github.com/JJApplication/fushin
-// or
+# or
 $ go install github.com/JJApplication/fushin
 ```
 
@@ -46,3 +46,70 @@ $ go install github.com/JJApplication/fushin
 当前模型文件为基于`json`的`pig`文件, 支持环境变量和自定义字段覆盖
 后期支持`yml`的文件格式
 模型文件的定义基于`octopus_meta`
+
+## 引入Fushin
+使用`Demo()`快速启动一个例子
+```go
+import (
+    "github.com/JJApplication/fushin"
+)
+
+package main
+func main() {
+	// Demo会默认开启一个http server和一个uds Server
+	fushin.Demo()
+}
+```
+结果
+```bash
+{"level":"INFO","time":"2022-8-14 15:36:33","caller":"http/engine_log.go:30","message":"<Server> signal [interrupt] registered"}
+{"level":"INFO","time":"2022-8-14 15:36:33","caller":"http/engine_log.go:30","message":"<Server> server init success"}
+{"level":"INFO","time":"2022-8-14 15:36:33","caller":"http/engine_log.go:30","message":"<Server> server will listen on 0.0.0.0:10086"}
+{"level":"INFO","time":"2022-8-14 15:36:33","caller":"http/engine_log.go:30","message":"<Server> server domain name is []"}
+{"level":"INFO","time":"2022-8-14 15:36:33","caller":"http/engine_log.go:30","message":"<Server> server debug: false"}
+{"level":"INFO","time":"2022-8-14 15:36:33","caller":"http/engine_log.go:30","message":"<Server> server enableLog: true"}
+{"level":"INFO","time":"2022-8-14 15:36:33","caller":"uds/log.go:33","message":"<UDSServer> uds server listen @ [/tmp/DemoUDS]"}
+```
+
+### 使用Fushin模块
+Fushin对微服务所需的大部分模块做到了封装和开箱即用
+例如引入`uds server`
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/JJApplication/fushin/server/uds"
+)
+
+func main() {
+	us := uds.New("unix socket address")
+    // change config
+	us.Option.MaxSize = 1<<20
+	us.Option.AutoRecover = true
+	if err := us.Listen(); err != nil {
+		fmt.Println(err)
+	}
+}
+```
+
+## 编译/贡献
+编译此项目
+```bash
+cd Fushin && go mod download
+go build
+```
+
+`Fushin`的可执行二进制仅提供根据模板生成项目代码的能力
+
+运行基准测试
+```bash
+go test -v ./xxx
+```
+
+## 使用Fushin开发的项目
+- [Hermes](https://github.com/JJApplication/Hermes)
+- [WDNMD](https://github.com/JJApplication/WDNMD)
+- and so on.

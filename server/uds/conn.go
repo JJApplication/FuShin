@@ -68,7 +68,7 @@ func (u *UDSServer) Listen() error {
 		return errors.New(ErrUdsAlreadyListen)
 	}
 	if u.Option.MaxSize <= 0 {
-		u.error(moduleName, "uds server request maxsize not set")
+		u.errorF("%s %s", moduleName, "uds server request maxsize not set")
 	}
 	addr, err := net.ResolveUnixAddr("unix", GetSocket(u.Name))
 	if err != nil {
@@ -81,6 +81,7 @@ func (u *UDSServer) Listen() error {
 		return err
 	}
 
+	u.infoF("%s uds server listen @ [%s]", moduleName, u.Name)
 	u.listener = listener
 	go u.AutoCheck()
 	go u.runtimeClosed()
@@ -123,7 +124,7 @@ func (u *UDSServer) Run(c net.Conn) {
 			continue
 		}
 		if count <= 1 {
-			u.error(moduleName, "received message is null")
+			u.errorF("%s %s", moduleName, "received message is null")
 			continue
 		}
 
@@ -165,7 +166,7 @@ func (u *UDSServer) AddFunc(operation string, f func(c *UDSContext, req Req)) {
 		u.funcs[operation] = f
 
 	} else {
-		u.error(moduleName, "addFunc operation is empty")
+		u.errorF("%s %s", moduleName, "addFunc operation is empty")
 	}
 }
 
@@ -182,13 +183,13 @@ func (u *UDSServer) runtimeClosed() {
 	for {
 		select {
 		case <-u.closeFlag:
-			u.info(moduleName, "unix server close signal received")
-			u.info(moduleName, "unix server is closed")
+			u.infoF("%s %s", moduleName, "unix server close signal received")
+			u.infoF("%s %s", moduleName, "unix server is closed")
 			close(u.closeFlag)
 			os.Exit(0)
 		default:
 			if u.listener == nil {
-				u.info(moduleName, "unix server is closed")
+				u.infoF("%s %s", moduleName, "unix server is closed")
 				close(u.closeFlag)
 				os.Exit(1)
 			}
@@ -201,9 +202,9 @@ func (u *UDSServer) AutoCheck() {
 		c := time.Tick(time.Duration(u.Option.AutoCheckDuration) * time.Second)
 		for range c {
 			if u.listener == nil {
-				u.error(moduleName, "autoCheck unix listener is nil")
+				u.errorF("%s %s", moduleName, "autoCheck unix listener is nil")
 			} else {
-				u.info(moduleName, "autoCheck unix listener is good")
+				u.infoF("%s %s", moduleName, "autoCheck unix listener is good")
 			}
 		}
 	}

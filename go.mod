@@ -8,6 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/google/uuid v1.3.0
 	github.com/gookit/color v1.5.1
+	github.com/gookit/goutil v0.5.8
 	github.com/json-iterator/go v1.1.12
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/stretchr/testify v1.8.0
