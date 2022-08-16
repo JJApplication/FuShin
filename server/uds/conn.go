@@ -209,3 +209,85 @@ func (u *UDSServer) AutoCheck() {
 		}
 	}
 }
+
+// Proxy 代理转发 只处理基础的报文错误
+func (u *UDSServer) Proxy(f Func) error {
+	if u.listener != nil {
+		return errors.New(ErrUdsAlreadyListen)
+	}
+	if u.Option.MaxSize <= 0 {
+		u.errorF("%s %s", moduleName, "uds server request maxsize not set")
+	}
+	addr, err := net.ResolveUnixAddr("unix", GetSocket(u.Name))
+	if err != nil {
+		u.errorF("%s resolve unix address error: %s", moduleName, err.Error())
+		return err
+	}
+	listener, err := net.ListenUnix("unix", addr)
+	if err != nil {
+		u.errorF("%s proxy on unix address [%s] error: %s", moduleName, addr, err.Error())
+		return err
+	}
+
+	u.infoF("%s uds server proxy @ [%s]", moduleName, u.Name)
+	u.listener = listener
+	go u.AutoCheck()
+	go u.runtimeClosed()
+	for {
+		conn, err := u.listener.Accept()
+		if err != nil && strings.Contains(err.Error(), net.ErrClosed.Error()) {
+			break
+		}
+		if err != nil {
+			u.errorF("%s unix accept error: %s", moduleName, err.Error())
+			continue
+		}
+		go u.proxyOn(conn, f)
+	}
+
+	return err
+}
+
+func (u *UDSServer) proxyOn(c net.Conn, f Func) {
+	if u.Option.AutoRecover {
+		defer func() {
+			if err := recover(); err != nil {
+				u.errorF("%s [recover] from uds server: %v", moduleName, err)
+			}
+		}()
+	}
+
+	u.infoF("%s uds client [%s] connected", moduleName, c.RemoteAddr().String())
+
+	for {
+		buf := make([]byte, u.Option.MaxSize)
+		count, err := c.Read(buf)
+		if err != nil {
+			if err == io.EOF {
+				u.errorF("%s read from uds client, client disconnected", moduleName)
+				break
+			}
+			u.errorF("%s read from uds client error: %s", moduleName, err.Error())
+			continue
+		}
+		if count <= 1 {
+			u.errorF("%s %s", moduleName, "received message is null")
+			continue
+		}
+
+		// 处理handler后返回
+		reqBody := u.Option.RequestFormat
+		err = json.Json.Unmarshal(buf[:count], &reqBody)
+		if err != nil {
+			Response(c, Res{
+				Error: ErrUnresolvedBody,
+				Data:  "",
+				From:  "",
+				To:    nil,
+			})
+			continue
+		}
+		f(&UDSContext{c: c, operation: ""}, reqBody)
+	}
+	defer c.Close()
+}

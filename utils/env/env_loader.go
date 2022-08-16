@@ -113,3 +113,61 @@ func (e *EnvLoader) Time() time.Time {
 func (e *EnvLoader) Interface() interface{} {
 	return e.raw
 }
+
+// 带默认值的加载
+
+func (e *EnvLoader) MustInt(def int) int {
+	if e.raw == "" {
+		return def
+	}
+	return e.Int()
+}
+
+func (e *EnvLoader) MustInt64(def int64) int64 {
+	if e.raw == "" {
+		return def
+	}
+	return e.Int64()
+}
+
+func (e *EnvLoader) MustInt32(def int32) int32 {
+	if e.raw == "" {
+		return def
+	}
+	return e.Int32()
+}
+
+func (e *EnvLoader) MustInt16(def int16) int16 {
+	if e.raw == "" {
+		return def
+	}
+	return e.Int16()
+}
+
+func (e *EnvLoader) MustInt8(def int8) int8 {
+	if e.raw == "" {
+		return def
+	}
+	return e.Int8()
+}
+
+func (e *EnvLoader) MustFloat64(def float64) float64 {
+	if e.raw == "" {
+		return def
+	}
+	return e.Float64()
+}
+
+func (e *EnvLoader) MustFloat32(def float32) float32 {
+	if e.raw == "" {
+		return def
+	}
+	return e.Float32()
+}
+
+func (e *EnvLoader) MustBool(def bool) bool {
+	if e.raw == "" {
+		return def
+	}
+	return e.Bool()
+}

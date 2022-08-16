@@ -10,6 +10,7 @@ package uds
 
 const (
 	ErrUnsupportedOperation = "unsupported operation"
+	ErrUnresolvedBody       = "unresolved request body"
 	ErrUdsListenerNil       = "unix server listener is nil"
 	ErrUdsAlreadyListen     = "unix server already listened"
 )
