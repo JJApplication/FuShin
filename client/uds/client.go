@@ -81,7 +81,7 @@ func (c *UDSClient) SendWithRes(req uds.Req) (uds.Res, error) {
 		return uds.Res{}, err
 	}
 
-	return uds.Res{}, nil
+	return res, nil
 }
 
 // SendRawWithRes 发送raw数据并接收返回
@@ -90,7 +90,12 @@ func (c *UDSClient) SendRawWithRes(data string) ([]byte, error) {
 		return nil, errors.New(ErrDialClosed)
 	}
 	_, err := c.conn.Write([]byte(data))
-	return nil, err
+	var buf = make([]byte, maxSize(c.MaxRecvSize))
+	count, err := c.conn.Read(buf)
+	if err != nil {
+		return nil, err
+	}
+	return buf[:count], err
 }
 
 func (c *UDSClient) Close() error {
