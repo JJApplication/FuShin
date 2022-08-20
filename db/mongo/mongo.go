@@ -88,9 +88,9 @@ func (m *Mongo) Update(mod Model, data Model) error {
 }
 
 // Insert 插入一条数据 返回错误
-func (m *Mongo) Insert(mod Model, data interface{}) error {
-	_, err := mgm.Coll(mod).InsertOne(context.Background(), data)
-	return err
+// data 应该为指针类型 用于更新时间
+func (m *Mongo) Insert(mod Model, data Model) error {
+	return mgm.Coll(mod).Create(data)
 }
 
 func (m *Mongo) Delete(mod Model, data Model) error {

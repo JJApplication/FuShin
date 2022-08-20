@@ -47,7 +47,7 @@ func TestMongo(t *testing.T) {
 
 	// m insert
 	data.Name = "test short insert"
-	err = m.Insert(&TestModel{}, data)
+	err = m.Insert(&TestModel{}, &data)
 	t.Log(err)
 
 	var ud TestModel
