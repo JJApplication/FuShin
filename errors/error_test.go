@@ -30,3 +30,14 @@ func TestFushinError(t *testing.T) {
 	// panic
 	panic("panic2")
 }
+
+func TestFushinTryCatch(t *testing.T) {
+	Try(func() {
+		t.Log("start")
+		panic("test panic")
+	}).Catch(func(exception interface{}) {
+		t.Log(exception)
+	}).Finally(func() {
+		t.Log("end")
+	})
+}

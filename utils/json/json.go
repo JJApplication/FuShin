@@ -13,3 +13,4 @@ import (
 )
 
 var Json = jsoniter.ConfigCompatibleWithStandardLibrary
+var JSON = jsoniter.ConfigCompatibleWithStandardLibrary
