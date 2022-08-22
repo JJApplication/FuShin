@@ -67,4 +67,6 @@ func DefaultEncodeConfig() zapcore.EncoderConfig {
 const EncodingJSON = "json"
 const EncodingConsole = "console"
 
+// DefaultOutput 默认会记录到stderr
+// fatal错误不会被记录
 var DefaultOutput = []string{"stderr"}

@@ -84,6 +84,9 @@ func (s *Server) Init() {
 		s.engine = gin.New()
 		s.engine.Use(gin.Recovery())
 	}
+	if s.EnableLog {
+		s.engine.Use(ginLogger())
+	}
 	if s.PProf {
 		pprof.Register(s.engine)
 	}

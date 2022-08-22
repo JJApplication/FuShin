@@ -26,3 +26,10 @@ func convertWrap(wrap WrapperFunc) gin.HandlerFunc {
 		wrap(&Context{context})
 	}
 }
+
+// 由gin handleFunc转换为wrapFunc
+func convertHandle(handler gin.HandlerFunc) WrapperFunc {
+	return func(c *Context) {
+		handler(c.Context)
+	}
+}

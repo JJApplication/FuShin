@@ -76,17 +76,18 @@ func (l *ilog) ErrorF(fmtStr string, v ...interface{}) {
 }
 
 func (l *ilog) colored(s string) string {
+	var padding = func(s string) string { return fmt.Sprintf(" %s ", s) }
 	if pkg.FushinLogColor {
 		switch s {
 		case "INFO":
-			return color.BgBlue.Sprint(s)
+			return color.BgBlue.Sprint(padding(s))
 		case "WARN":
-			return color.BgYellow.Sprint(s)
+			return color.BgYellow.Sprint(padding(s))
 		case "ERRO":
-			return color.BgRed.Sprint(s)
+			return color.BgRed.Sprint(padding(s))
 		default:
-			return s
+			return padding(s)
 		}
 	}
-	return s
+	return padding(s)
 }

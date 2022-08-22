@@ -17,8 +17,8 @@ import (
 
 func TestNewServer(t *testing.T) {
 	s := Server{
-		Debug:        true,
-		EnableLog:    false,
+		Debug:        false,
+		EnableLog:    true,
 		RegSignal:    nil,
 		Address:      Address{Host: "0.0.0.0", Port: 9999},
 		Headers:      nil,
