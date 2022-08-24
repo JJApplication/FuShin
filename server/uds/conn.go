@@ -14,7 +14,6 @@ import (
 	"net"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/JJApplication/fushin/log"
@@ -172,11 +171,8 @@ func (u *UDSServer) AddFunc(operation string, f func(c *UDSContext, req Req)) {
 
 // Close 关闭unix的listener 不再接收请求
 func (u *UDSServer) Close() {
-	lock := sync.Mutex{}
-	lock.Lock()
-	u.listener.Close()
-	u.closeFlag <- 1
-	lock.Unlock()
+	u.infoF("%s try to stop unix server", moduleName)
+	close(u.closeFlag)
 }
 
 func (u *UDSServer) runtimeClosed() {
@@ -185,14 +181,9 @@ func (u *UDSServer) runtimeClosed() {
 		case <-u.closeFlag:
 			u.infoF("%s %s", moduleName, "unix server close signal received")
 			u.infoF("%s %s", moduleName, "unix server is closed")
-			close(u.closeFlag)
+			err := u.listener.Close()
+			u.warnF("%s unix listener closed with error: %v", moduleName, err)
 			os.Exit(0)
-		default:
-			if u.listener == nil {
-				u.infoF("%s %s", moduleName, "unix server is closed")
-				close(u.closeFlag)
-				os.Exit(1)
-			}
 		}
 	}
 }

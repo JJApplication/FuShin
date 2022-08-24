@@ -174,13 +174,18 @@ func (s *Server) ListenSmooth() {
 }
 
 // RegSignals 信号注册
+// 默认为空时注册interrupt可能导致其他loop无法退出
+// 所以仅在debug模式下注册此信号
 func (s *Server) RegSignals(sigs ...os.Signal) {
 	// 自动去重
 	currentSigs := s.RegSignal
 	allSigs := append(currentSigs, sigs...)
 	temp := make(map[string]os.Signal, 1)
 	// 注册默认的interrupt信号
-	temp[syscall.SIGINT.String()] = syscall.SIGINT
+	if s.Debug {
+		temp[syscall.SIGINT.String()] = syscall.SIGINT
+	}
+
 	for _, sig := range allSigs {
 		if _, ok := temp[sig.String()]; !ok {
 			temp[sig.String()] = sig

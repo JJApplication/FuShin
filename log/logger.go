@@ -17,10 +17,11 @@ import (
 )
 
 type Logger struct {
-	Name   string
-	Option Option
-	Sync   bool
-	logger *zap.SugaredLogger // 使用反射而不是filed字段
+	Name      string
+	Option    Option
+	Sync      bool
+	logger    *zap.SugaredLogger // 使用反射而不是filed字段
+	zapLogger *zap.Logger
 }
 
 // Init 从Logger内置的参数新建日志构建logger
@@ -75,9 +76,10 @@ func Default(name string) *Logger {
 	}
 	defer logger.Sync()
 	return &Logger{
-		Name:   name,
-		Sync:   true,
-		logger: logger.Sugar(),
+		Name:      name,
+		Sync:      true,
+		logger:    logger.Sugar(),
+		zapLogger: logger,
 	}
 }
 
@@ -89,8 +91,9 @@ func Dev(name string) *Logger {
 	}
 	defer logger.Sync()
 	return &Logger{
-		Name:   name,
-		logger: logger.Sugar(),
+		Name:      name,
+		logger:    logger.Sugar(),
+		zapLogger: logger,
 	}
 }
 
@@ -103,9 +106,10 @@ func New(name string, op Option) *Logger {
 	}
 	defer logger.Sync()
 	return &Logger{
-		Name:   name,
-		Sync:   true,
-		logger: logger.Sugar(),
+		Name:      name,
+		Sync:      true,
+		logger:    logger.Sugar(),
+		zapLogger: logger,
 	}
 }
 
@@ -117,8 +121,9 @@ func Raw(name string, c zap.Config, op ...zap.Option) Logger {
 		return Logger{}
 	}
 	return Logger{
-		Name:   name,
-		logger: logger.Sugar(),
+		Name:      name,
+		logger:    logger.Sugar(),
+		zapLogger: logger,
 	}
 }
 
