@@ -38,14 +38,16 @@ func TestNewUDSServer(t *testing.T) {
 	})
 
 	go server.Listen()
-	c, cancel := context.WithTimeout(context.Background(), time.Second*60)
+	c, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 	for {
 		select {
 		case <-c.Done():
 			t.Log("exit server")
 			server.Close()
+			return
 		default:
+			break
 		}
 	}
 }

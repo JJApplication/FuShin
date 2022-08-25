@@ -12,8 +12,8 @@ import (
 	"errors"
 	"io"
 	"net"
-	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/JJApplication/fushin/log"
@@ -27,7 +27,8 @@ type UDSServer struct {
 	Option    Option              // 默认使用fushin option
 	Logger    log.LoggerInterface // 默认使用fushin logger
 	listener  *net.UnixListener   // 内部的listener
-	closeFlag chan int
+	mux       sync.Mutex
+	closeFlag chan struct{}
 	funcs     Funcs // 注册的操作
 }
 
@@ -37,7 +38,8 @@ func New(name string) *UDSServer {
 		Name:      name,
 		Option:    Option{MaxSize: 1 << 10},
 		Logger:    nil,
-		closeFlag: make(chan int),
+		closeFlag: make(chan struct{}),
+		mux:       sync.Mutex{},
 	}
 }
 
@@ -47,7 +49,8 @@ func NewWithOption(name string, o Option, l log.LoggerInterface) *UDSServer {
 		Name:      name,
 		Option:    o,
 		Logger:    l,
-		closeFlag: make(chan int),
+		closeFlag: make(chan struct{}),
+		mux:       sync.Mutex{},
 	}
 }
 
@@ -57,7 +60,8 @@ func Default(name string) *UDSServer {
 		Name:      name,
 		Option:    DefaultOption,
 		Logger:    nil,
-		closeFlag: make(chan int),
+		closeFlag: make(chan struct{}),
+		mux:       sync.Mutex{},
 	}
 }
 
@@ -83,7 +87,6 @@ func (u *UDSServer) Listen() error {
 	u.infoF("%s uds server listen @ [%s]", moduleName, u.Name)
 	u.listener = listener
 	go u.AutoCheck()
-	go u.runtimeClosed()
 	for {
 		conn, err := u.listener.Accept()
 		if err != nil && strings.Contains(err.Error(), net.ErrClosed.Error()) {
@@ -170,21 +173,40 @@ func (u *UDSServer) AddFunc(operation string, f func(c *UDSContext, req Req)) {
 }
 
 // Close 关闭unix的listener 不再接收请求
-func (u *UDSServer) Close() {
-	u.infoF("%s try to stop unix server", moduleName)
-	close(u.closeFlag)
+func (u *UDSServer) Close() error {
+	u.mux.Lock()
+	defer u.mux.Unlock()
+	u.closedDoneLock()
+	err := u.listener.Close()
+	u.warnF("%s unix listener closed with error: %v", moduleName, err)
+	return err
 }
 
-func (u *UDSServer) runtimeClosed() {
-	for {
-		select {
-		case <-u.closeFlag:
-			u.infoF("%s %s", moduleName, "unix server close signal received")
-			u.infoF("%s %s", moduleName, "unix server is closed")
-			err := u.listener.Close()
-			u.warnF("%s unix listener closed with error: %v", moduleName, err)
-			os.Exit(0)
-		}
+func (u *UDSServer) getDoneChan() chan struct{} {
+	u.mux.Lock()
+	defer u.mux.Unlock()
+	return u.getCloseDone()
+}
+
+func (u *UDSServer) getCloseDone() chan struct{} {
+	if u.closeFlag == nil {
+		u.closeFlag = make(chan struct{})
+		return u.closeFlag
+	}
+	return u.closeFlag
+}
+
+func (u *UDSServer) closedDoneLock() {
+	ch := u.getCloseDone()
+	select {
+	case <-ch:
+		// already closed
+	default:
+		// close ch
+		close(ch)
+		u.infoF("%s try to stop unix server", moduleName)
+		u.infoF("%s %s", moduleName, "unix server close signal received")
+		u.infoF("%s %s", moduleName, "unix server is closed")
 	}
 }
 
@@ -223,7 +245,6 @@ func (u *UDSServer) Proxy(f Func) error {
 	u.infoF("%s uds server proxy @ [%s]", moduleName, u.Name)
 	u.listener = listener
 	go u.AutoCheck()
-	go u.runtimeClosed()
 	for {
 		conn, err := u.listener.Accept()
 		if err != nil && strings.Contains(err.Error(), net.ErrClosed.Error()) {
