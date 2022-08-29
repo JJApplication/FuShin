@@ -109,7 +109,7 @@ func TestNewServerResponse(t *testing.T) {
 		RegSignal:    nil,
 		Address:      Address{Host: "0.0.0.0", Port: 9999},
 		Headers:      nil,
-		Copyright:    "",
+		Copyright:    "Copyright by Fushin",
 		MaxBodySize:  0,
 		ReadTimeout:  0,
 		WriteTimeout: 0,

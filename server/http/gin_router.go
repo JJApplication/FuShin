@@ -33,3 +33,8 @@ func convertHandle(handler gin.HandlerFunc) WrapperFunc {
 		handler(c.Context)
 	}
 }
+
+// ToWrapperFunc 暴露外部使用 当需要从gin中间件转为fushin时
+func ToWrapperFunc(handlerFunc gin.HandlerFunc) WrapperFunc {
+	return convertHandle(handlerFunc)
+}

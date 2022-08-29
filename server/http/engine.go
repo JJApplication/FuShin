@@ -83,6 +83,8 @@ func (s *Server) Init() {
 	if s.engine == nil {
 		s.engine = gin.New()
 		s.engine.Use(gin.Recovery())
+		s.addCopyright()
+		s.addPresetHeaders()
 	}
 	if s.EnableLog {
 		s.engine.Use(ginLogger())

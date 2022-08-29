@@ -116,6 +116,13 @@ func (e *EnvLoader) Interface() interface{} {
 
 // 带默认值的加载
 
+func (e *EnvLoader) MustString(def string) string {
+	if e.raw == "" {
+		return def
+	}
+	return e.Raw()
+}
+
 func (e *EnvLoader) MustInt(def int) int {
 	if e.raw == "" {
 		return def
