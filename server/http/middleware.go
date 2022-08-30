@@ -11,6 +11,7 @@ Copyright Renj
 package http
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gin-contrib/cache"
@@ -19,6 +20,10 @@ import (
 )
 
 // 内置中间件
+
+const (
+	FushinBuf = "enableFushinBuf"
+)
 
 // MiddleWareLogger 路由日志
 func MiddleWareLogger() WrapperFunc {
@@ -71,4 +76,22 @@ func MiddleWareCache(duration time.Duration, wrapperFunc WrapperFunc) WrapperFun
 		}
 	}
 	return convertHandle(cache.CachePage(store, duration, convertWrap(wrapperFunc)))
+}
+
+// MiddleWareFushinBuf 开启fushin buf 基于gob的二进制传输
+// 仅在header开启enableFushinbuf时 或query?enableFushinbuf=true启用
+func MiddleWareFushinBuf() WrapperFunc {
+	return func(c *Context) {
+		// check headers
+		header := c.GetHeader(FushinBuf)
+		// check query
+		query := c.Query(FushinBuf)
+		if header == "true" || query == "true" {
+			fmt.Println(header)
+			c.Header(FushinBuf, "true")
+			c.Set(FushinBuf, true)
+		} else {
+			c.Next()
+		}
+	}
 }

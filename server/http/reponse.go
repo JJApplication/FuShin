@@ -11,6 +11,7 @@ package http
 import (
 	"fmt"
 
+	"github.com/JJApplication/fushin/utils/buf"
 	"github.com/JJApplication/fushin/utils/json"
 )
 
@@ -24,8 +25,17 @@ const (
 	FILE   = "FILE"
 )
 
+const (
+	// CtxDone 上下文响应结束
+	CtxDone = "CtxDone"
+)
+
 // Response 响应
 func (c *Context) Response(t string, s int, data interface{}) {
+	c.BeforeResponse(responseWithFushinBuf(data))
+	if c.GetBool(CtxDone) {
+		return
+	}
 	switch t {
 	case REST:
 		c.JSON(s, data)
@@ -44,22 +54,31 @@ func (c *Context) Response(t string, s int, data interface{}) {
 }
 
 // BeforeResponse 响应前的处理
-func (c *Context) BeforeResponse() {
+func (c *Context) BeforeResponse(wrapperFunc WrapperFunc) {
+	wrapperFunc(c)
+}
 
+// 默认注册的Fushinbuf响应
+func responseWithFushinBuf(data interface{}) WrapperFunc {
+	return func(c *Context) {
+		if c.GetBool(FushinBuf) {
+			d, _ := buf.Encode(data)
+			c.ResponseByte(d)
+			c.Set(CtxDone, true)
+			return
+		}
+	}
 }
 
 // ResponseAny 不做类型推断返回stream
 func (c *Context) ResponseAny(data interface{}) {
+	c.BeforeResponse(responseWithFushinBuf(data))
 	d, err := json.Json.Marshal(data)
 	if err != nil {
-		if _, err = c.Writer.Write(nil); err != nil {
-			c.Abort()
-		}
+		c.ResponseByte(nil)
 		return
 	}
-	if _, err = c.Writer.Write(d); err != nil {
-		c.Abort()
-	}
+	c.ResponseByte(d)
 	return
 }
 
@@ -95,4 +114,10 @@ func (c *Context) ResponseGood(t string, data interface{}) {
 // ResponseBad 错误响应500
 func (c *Context) ResponseBad(t string, data interface{}) {
 	c.Response(t, 500, data)
+}
+
+func (c *Context) ResponseByte(b []byte) {
+	if _, err := c.Writer.Write(b); err != nil {
+		c.AbortWithStatus(500)
+	}
 }

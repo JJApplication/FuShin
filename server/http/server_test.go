@@ -31,7 +31,7 @@ func TestNewServer(t *testing.T) {
 	s.Init()
 	s.Route(GET, "/", func(c *Context) {
 		t.Log(c.Request.RequestURI)
-		c.String(200, "%s", "Hello World")
+		c.ResponseStr(200, "Hello World")
 	})
 	err := s.Listen()
 	t.Log(err)
