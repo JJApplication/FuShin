@@ -73,6 +73,15 @@ type Wrapper struct {
 	WrapperFunc WrapperFunc
 }
 
+// GETTER
+func (s *Server) GetAddr() string {
+	return fmt.Sprintf("%s:%d", s.Address.Host, s.Address.Port)
+}
+
+func (s *Server) GetEngine() *gin.Engine {
+	return s.engine
+}
+
 // Init 在其他方法被调用前初始化
 func (s *Server) Init() {
 	if s.Debug {

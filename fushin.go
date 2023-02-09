@@ -14,6 +14,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
+	"github.com/JJApplication/fushin/inner"
 	"github.com/JJApplication/fushin/private"
 )
 
@@ -29,7 +30,12 @@ func exit(err error) {
 }
 
 func main() {
-	fmt.Println("using Fushin to create application of projectJJ")
+	fmt.Println("👻 Thanks for using Fushin to create application of projectJJ")
+	fmt.Printf("🐼 Copyright: %s\n🔗 Go to site: http://%s\n📧 Email: %s\n",
+		inner.COPYRIGHT,
+		inner.SITE,
+		inner.MAIL,
+	)
 	// 创建项目名称
 	projectName := ""
 	promptProjectName := &survey.Input{
@@ -73,4 +79,5 @@ func main() {
 	if startTodo {
 		private.CreateDir(projectName, chooseType, chooseDataType, protocol)
 	}
+	fmt.Println("🥤 Enjoy yourself!!!")
 }
