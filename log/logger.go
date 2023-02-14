@@ -14,6 +14,7 @@ import (
 	"sync"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type Logger struct {
@@ -130,4 +131,21 @@ func Raw(name string, c zap.Config, op ...zap.Option) Logger {
 // NewZap 不使用sugar而是使用原生的zap logger
 func NewZap(c zap.Config, op ...zap.Option) (*zap.Logger, error) {
 	return c.Build(op...)
+}
+
+// NewCore 基于core创建
+func NewCore(name string, op Option) *Logger {
+	zapCore := zapcore.NewCore(
+		coreEncoder(op.Encoding),
+		zapcore.AddSync(wrapRotateCore(name, op.RotateOption)),
+		zap.NewAtomicLevel(),
+	)
+
+	logger := zap.New(zapCore, zap.AddCaller(), zap.AddCallerSkip(1))
+	return &Logger{
+		Name:      name,
+		Sync:      true,
+		logger:    logger.Sugar(),
+		zapLogger: logger,
+	}
 }

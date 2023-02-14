@@ -23,6 +23,7 @@ require (
 require (
 	github.com/bradfitz/gomemcache v0.0.0-20220106215444-fb4bf637b56d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6 // indirect
 	github.com/gin-contrib/cache v1.2.0 // indirect
 	github.com/gin-contrib/gzip v0.0.6 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -34,6 +35,7 @@ require (
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gomodule/redigo v1.8.9 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jxskiss/ginregex v0.2.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/compress v1.9.5 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
@@ -63,6 +65,7 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

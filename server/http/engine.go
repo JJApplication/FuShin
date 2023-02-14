@@ -30,6 +30,7 @@ type Server struct {
 	mux          *sync.RWMutex       // 可重入的锁
 	wrapper      []Wrapper           // 中间件 顺序加载
 	router       map[string]Router   // 路由
+	staticRouter map[string]string   // 静态路由
 	srv          *http.Server        // 内置的http.server
 	EnableLog    bool                // 使用内置的日志打印 默认输出到控制台
 	Logger       log.LoggerInterface // 使用的日志记录器 默认为内置日志
@@ -74,6 +75,7 @@ type Wrapper struct {
 }
 
 // GETTER
+
 func (s *Server) GetAddr() string {
 	return fmt.Sprintf("%s:%d", s.Address.Host, s.Address.Port)
 }
@@ -259,9 +261,8 @@ func (s *Server) Group(path string, wrap ...WrapperFunc) *RouterGroup {
 	return &RouterGroup{s.engine.Group(path, convertWraps(wrap...)...)}
 }
 
-// 路由方法 不提供语法糖写法
+// Route 路由方法 不提供语法糖写法
 // 必须指定请求方法
-
 func (s *Server) Route(method, uri string, wrap ...WrapperFunc) {
 	s.mux.RLock()
 	if _, ok := s.router[method+uri]; ok {
@@ -274,6 +275,18 @@ func (s *Server) Route(method, uri string, wrap ...WrapperFunc) {
 		wrapper: wrap,
 	}
 	defer s.mux.RUnlock()
+}
+
+// Static 静态伺服功能 将代理uri指向本地的fs路径下的文件
+// 静态路由不会进入router中存储所以应该最先定义
+func (s *Server) Static(uri string, fs string) {
+	if _, ok := s.staticRouter[uri]; ok {
+		s.errorF("%s ->static route [%s] -> [%s] has already been registered", moduleName, uri, fs)
+		return
+	}
+
+	s.engine.Static(uri, fs)
+	s.staticRouter[uri] = fs
 }
 
 // RegMiddle 注册中间件

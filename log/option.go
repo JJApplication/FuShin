@@ -21,6 +21,23 @@ type Option struct {
 	Encoding     string
 	Output       []string
 	EncodeConfig zapcore.EncoderConfig // 原生的zap配置
+	RotateOption RotateOption
+}
+
+type RotateOption struct {
+	MaxSize    int // 单位mb
+	MaxAge     int // 单位天
+	MaxBackups int // 单位个
+	LocalTime  bool
+	Compress   bool
+}
+
+var DefaultRotateOption = RotateOption{
+	MaxSize:    10,
+	MaxAge:     30,
+	MaxBackups: 10,
+	LocalTime:  true,
+	Compress:   false,
 }
 
 // DefaultOption 默认配置
