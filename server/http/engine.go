@@ -32,6 +32,7 @@ type Server struct {
 	router       map[string]Router   // 路由
 	staticRouter map[string]string   // 静态路由
 	srv          *http.Server        // 内置的http.server
+	hasInit      bool                // 是否初始化的标志
 	EnableLog    bool                // 使用内置的日志打印 默认输出到控制台
 	Logger       log.LoggerInterface // 使用的日志记录器 默认为内置日志
 	Debug        bool                // 开启gin的debug
@@ -84,6 +85,16 @@ func (s *Server) GetEngine() *gin.Engine {
 	return s.engine
 }
 
+func (s *Server) setInit() {
+	s.hasInit = true
+}
+
+func (s *Server) isInit() {
+	if !s.hasInit {
+		panic(ErrEngineEmpty)
+	}
+}
+
 // Init 在其他方法被调用前初始化
 func (s *Server) Init() {
 	if s.Debug {
@@ -104,6 +115,7 @@ func (s *Server) Init() {
 		pprof.Register(s.engine)
 	}
 	s.router = make(map[string]Router, 1)
+	s.staticRouter = make(map[string]string, 1)
 	s.wrapper = make([]Wrapper, 0)
 	s.mux = &sync.RWMutex{}
 	s.srv = &http.Server{
@@ -116,6 +128,7 @@ func (s *Server) Init() {
 		IdleTimeout:       0,
 		MaxHeaderBytes:    0,
 	}
+	s.setInit()
 }
 
 func (s *Server) Listen() error {

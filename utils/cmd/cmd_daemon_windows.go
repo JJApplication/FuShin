@@ -1,7 +1,7 @@
-//go:build linux || darwin
+//go:build windows
 
 /*
-Create: 2023/2/13
+Create: 2023/2/15
 Project: FuShin
 Github: https://github.com/landers1037
 Copyright Renj
@@ -12,7 +12,6 @@ package cmd
 import (
 	"os"
 	"os/exec"
-	"syscall"
 )
 
 // 以fork的形式启动进程
@@ -20,10 +19,6 @@ import (
 // DaemonCall daemon调用任意指定的命令
 func DaemonCall(program string, args ...string) error {
 	cmd := exec.Command(program, args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setsid: true,
-	}
-
 	if err := cmd.Start(); err != nil {
 		return err
 	}
@@ -42,9 +37,6 @@ func Daemon(exclude string) {
 		}
 	}
 	cmd := exec.Command(procName, args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setsid: true,
-	}
 	_ = cmd.Start()
 }
 
@@ -58,9 +50,6 @@ func DaemonWith(exclude string) (int, error) {
 		}
 	}
 	cmd := exec.Command(procName, args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Setsid: true,
-	}
 
 	err := cmd.Start()
 	return cmd.Process.Pid, err
