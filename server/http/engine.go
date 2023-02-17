@@ -292,13 +292,18 @@ func (s *Server) Route(method, uri string, wrap ...WrapperFunc) {
 
 // Static 静态伺服功能 将代理uri指向本地的fs路径下的文件
 // 静态路由不会进入router中存储所以应该最先定义
-func (s *Server) Static(uri string, fs string) {
+// uri 路由, fs 文件系统路径, enableHTTP 是否启动HTTP文件服务器
+func (s *Server) Static(uri string, fs string, enableHTTP bool) {
 	if _, ok := s.staticRouter[uri]; ok {
 		s.errorF("%s ->static route [%s] -> [%s] has already been registered", moduleName, uri, fs)
 		return
 	}
 
-	s.engine.Static(uri, fs)
+	if enableHTTP {
+		s.engine.StaticFS(uri, http.Dir(fs))
+	} else {
+		s.engine.Static(uri, fs)
+	}
 	s.staticRouter[uri] = fs
 }
 
