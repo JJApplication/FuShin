@@ -9,6 +9,9 @@ Copyright Renj
 package main
 
 import (
+	"fmt"
+
+	"github.com/JJApplication/fushin/internal"
 	"github.com/JJApplication/fushin/log"
 	"github.com/JJApplication/fushin/server/http"
 	"github.com/JJApplication/fushin/server/uds"
@@ -18,6 +21,9 @@ import (
 // demo 包含了server uds, http
 // logger of zap
 func Demo() {
+	fmt.Printf("Copyright: %s\n", internal.COPYRIGHT)
+	fmt.Printf("Powered by: %s\n", internal.SITE)
+	fmt.Printf("Email: %s\n", internal.MAIL)
 	// init logger
 	logger := log.Logger{
 		Name:   "Demo",

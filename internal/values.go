@@ -7,7 +7,7 @@ Copyright Renj
 inner package
 */
 
-package inner
+package internal
 
 var COPYRIGHT = "Landers"
 var SITE = "renj.io"
