@@ -5,8 +5,8 @@ Github: https://github.com/landers1037
 Copyright Renj
 */
 
-// Package private
-package main
+// Package fushin
+package fushin
 
 import (
 	"fmt"

@@ -5,7 +5,7 @@ Github: https://github.com/landers1037
 Copyright Renj
 */
 
-package main
+package fushin
 
 import "testing"
 
