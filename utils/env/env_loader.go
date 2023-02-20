@@ -5,7 +5,6 @@ Github: https://github.com/landers1037
 Copyright Renj
 */
 
-// Package env
 package env
 
 import (
@@ -18,6 +17,11 @@ import (
 type EnvLoader struct {
 	KeepRawValue bool // 断言失败时返回原始值 为false时raw永远为原始值的空值
 	raw          string
+}
+
+// NewEnvLoader 返回一个环境变量加载器示例
+func NewEnvLoader() EnvLoader {
+	return EnvLoader{}
 }
 
 func (e *EnvLoader) GetValue(key string) string {

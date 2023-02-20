@@ -3,11 +3,16 @@ Create: 2022/8/20
 Project: FuShin
 Github: https://github.com/landers1037
 Copyright Renj
+*/
 
-// 使用New创建一个FushinError对象
-// 使用errors.Recover(recover())接收goroutine的recover信息
-// 当Recover一个FushinError时不保留堆栈信息 只记录goroutine id
-// 使用errors.Panic()创建一个带有FushinError的panic
+/*
+Package errors 封装的错误处理包
+
+使用New创建一个FushinError对象
+使用errors.Recover(recover())接收goroutine的recover信息
+当Recover一个FushinError时不保留堆栈信息 只记录goroutine id
+使用errors.Panic()创建一个带有FushinError的panic
+
 func TestFushinError() {
 	defer func() {
 		rec := Recover(recover())
@@ -27,6 +32,4 @@ func TestFushinError() {
 	panic("panic2")
 }
 */
-
-// Package errors
 package errors

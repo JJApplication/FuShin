@@ -5,6 +5,8 @@ Github: https://github.com/landers1037
 Copyright Renj
 */
 
+// Package proc
+// 获取运行时pid以及记录到文件
 package proc
 
 import (

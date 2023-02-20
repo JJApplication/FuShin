@@ -9,13 +9,22 @@ Copyright Renj
 package private
 
 import (
+	"log"
 	"testing"
 )
 
 func TestLogInfo(t *testing.T) {
-	Log.info("test1", "test2")
+	Log.Info("test1", "test2")
 }
 
 func TestLogInfoF(t *testing.T) {
-	Log.infoF("%s1", "test")
+	Log.InfoF("%s1", "test")
+}
+
+func TestDevLog(t *testing.T) {
+	t.Log("start")
+	l := NewLogger("[Test] ", log.LstdFlags, true)
+	l.Error("error")
+	l.Warn("warn")
+	l.Info("info")
 }

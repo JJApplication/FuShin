@@ -22,56 +22,57 @@ import (
 type ilog struct {
 	Prefix string
 	Flag   int
+	ld     *DevLog
 }
 
 var Log ilog
 
 func init() {
+	fmt.Println(pkg.Fushin)
 	Log = ilog{
 		Prefix: fmt.Sprintf("[%s] ", pkg.Fushin),
-		Flag:   log.LstdFlags,
+		Flag:   log.LstdFlags | log.Lshortfile,
 	}
 	Log.init()
 }
 
 func (l *ilog) init() {
-	log.SetPrefix(l.Prefix)
-	log.SetFlags(l.Flag)
+	l.ld = NewLogger(l.Prefix, l.Flag, pkg.FushinLogColor)
 }
 
 func (l *ilog) Info(v ...interface{}) {
 	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
-		log.Println(append([]interface{}{fmt.Sprintf("%s", l.colored("INFO"))}, v...)...)
+		l.ld.Info(v...)
 	}
 }
 
 func (l *ilog) InfoF(fmtStr string, v ...interface{}) {
 	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
-		log.Println(fmt.Sprintf("%s %s", l.colored("INFO"), fmt.Sprintf(fmtStr, v...)))
+		l.ld.InfoF(fmtStr, v...)
 	}
 }
 
 func (l *ilog) Warn(v ...interface{}) {
 	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
-		log.Println(append([]interface{}{fmt.Sprintf("%s", l.colored("WARN"))}, v...)...)
+		l.ld.Warn(v...)
 	}
 }
 
 func (l *ilog) WarnF(fmtStr string, v ...interface{}) {
 	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
-		log.Println(fmt.Sprintf("%s %s", l.colored("WARN"), fmt.Sprintf(fmtStr, v...)))
+		l.ld.WarnF(fmtStr, v...)
 	}
 }
 
 func (l *ilog) Error(v ...interface{}) {
 	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
-		log.Println(append([]interface{}{fmt.Sprintf("%s", l.colored("ERRO"))}, v...)...)
+		l.ld.Error(v...)
 	}
 }
 
 func (l *ilog) ErrorF(fmtStr string, v ...interface{}) {
 	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
-		log.Println(fmt.Sprintf("%s %s", l.colored("ERRO"), fmt.Sprintf(fmtStr, v...)))
+		l.ld.ErrorF(fmtStr, v...)
 	}
 }
 
