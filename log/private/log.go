@@ -40,6 +40,13 @@ func (l *ilog) init() {
 	l.ld = NewLogger(l.Prefix, l.Flag, pkg.FushinLogColor)
 }
 
+// Override 覆写log配置
+// 如需自定义Logger请在自定义后调用覆写内部FushinLog
+func Override(prefix string, flags int) {
+	Log.ld.logger.SetPrefix(prefix)
+	Log.ld.logger.SetFlags(flags)
+}
+
 func (l *ilog) Info(v ...interface{}) {
 	if pkg.FushinMode == "" || pkg.FushinMode == "development" {
 		l.ld.Info(v...)
