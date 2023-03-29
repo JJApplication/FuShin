@@ -13,7 +13,7 @@ import (
 	"net"
 
 	"github.com/JJApplication/fushin/server/uds"
-	"github.com/JJApplication/fushin/utils/json"
+	"github.com/JJApplication/fushin/utils/stream"
 )
 
 type UDSClient struct {
@@ -23,6 +23,21 @@ type UDSClient struct {
 }
 
 const MaxReadSize = 4096
+
+var udsResponseBuilder int = stream.JSONType
+
+// SetResponseBuilder 设置uds通信使用的流格式JSON YAML GOB FushinBuf
+func SetResponseBuilder(buildType int) {
+	udsResponseBuilder = buildType
+}
+
+func buildStream(v interface{}) ([]byte, error) {
+	return stream.Build(udsResponseBuilder, v)
+}
+
+func parseStream(data []byte, v interface{}) error {
+	return stream.Parse(udsResponseBuilder, data, v)
+}
 
 // Dial 连接指定的unix domain
 // 在初始化后被调用连接
@@ -44,7 +59,7 @@ func (c *UDSClient) Send(req uds.Req) error {
 	if c.conn == nil {
 		return errors.New(ErrDialClosed)
 	}
-	data, err := json.Json.Marshal(req)
+	data, err := buildStream(req)
 	if err != nil {
 		return err
 	}
@@ -67,7 +82,7 @@ func (c *UDSClient) SendWithRes(req uds.Req) (uds.Res, error) {
 	if c.conn == nil {
 		return uds.Res{}, errors.New(ErrDialClosed)
 	}
-	data, err := json.Json.Marshal(req)
+	data, err := buildStream(req)
 	if err != nil {
 		return uds.Res{}, err
 	}
@@ -77,7 +92,7 @@ func (c *UDSClient) SendWithRes(req uds.Req) (uds.Res, error) {
 	if err != nil {
 		return uds.Res{}, err
 	}
-	if err = json.Json.Unmarshal(buf[:count], &res); err != nil {
+	if err = parseStream(buf[:count], &res); err != nil {
 		return uds.Res{}, err
 	}
 

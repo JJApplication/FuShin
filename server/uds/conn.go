@@ -17,7 +17,6 @@ import (
 	"time"
 
 	"github.com/JJApplication/fushin/log"
-	"github.com/JJApplication/fushin/utils/json"
 )
 
 // 连接
@@ -133,7 +132,7 @@ func (u *UDSServer) Run(c net.Conn) {
 		// 开发模式下打印报文
 		u.infoF("%s message [%s] received", moduleName, strings.TrimSuffix(string(buf[:count]), ""))
 		reqBody := u.Option.RequestFormat
-		err = json.Json.Unmarshal(buf[:count], &reqBody)
+		err = parseStream(buf[:count], &reqBody)
 		if err != nil {
 			u.errorF("%s decode request from client error: %s", moduleName, err.Error())
 			continue
@@ -289,7 +288,7 @@ func (u *UDSServer) proxyOn(c net.Conn, f Func) {
 
 		// 处理handler后返回
 		reqBody := u.Option.RequestFormat
-		err = json.Json.Unmarshal(buf[:count], &reqBody)
+		err = parseStream(buf[:count], &reqBody)
 		if err != nil {
 			Response(c, Res{
 				Error: ErrUnresolvedBody,

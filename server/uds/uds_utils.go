@@ -15,8 +15,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/JJApplication/fushin/utils/json"
+	"github.com/JJApplication/fushin/utils/stream"
 )
+
+var udsResponseBuilder int = stream.JSONType
 
 // RemoveSocket 删除socket
 func RemoveSocket(s string) error {
@@ -51,7 +53,7 @@ func GetSocket(s string) string {
 
 // Response 响应body数据
 func Response(c net.Conn, res Res) error {
-	data, err := json.Json.Marshal(res)
+	data, err := buildStream(res)
 	if err != nil {
 		return err
 	}
@@ -61,10 +63,23 @@ func Response(c net.Conn, res Res) error {
 
 // ResponseAny 响应任意数据
 func ResponseAny(c net.Conn, res interface{}) error {
-	data, err := json.Json.Marshal(res)
+	data, err := buildStream(res)
 	if err != nil {
 		return err
 	}
 	_, err = c.Write(data)
 	return err
+}
+
+// SetResponseBuilder 设置uds通信使用的流格式JSON YAML GOB FushinBuf
+func SetResponseBuilder(buildType int) {
+	udsResponseBuilder = buildType
+}
+
+func buildStream(v interface{}) ([]byte, error) {
+	return stream.Build(udsResponseBuilder, v)
+}
+
+func parseStream(data []byte, v interface{}) error {
+	return stream.Parse(udsResponseBuilder, data, v)
 }
