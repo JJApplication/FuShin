@@ -11,6 +11,7 @@ package log
 import (
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 
 	"go.uber.org/zap"
@@ -135,6 +136,41 @@ func NewZap(c zap.Config, op ...zap.Option) (*zap.Logger, error) {
 
 // NewCore 基于core创建
 func NewCore(name string, op Option) *Logger {
+	f, _ := os.OpenFile(name, os.O_CREATE|os.O_APPEND, 0755)
+	zapCore := zapcore.NewCore(
+		coreEncoder(op.Encoding),
+		zapcore.AddSync(f),
+		zap.NewAtomicLevel(),
+	)
+
+	logger := zap.New(zapCore, zap.AddCaller(), zap.AddCallerSkip(1))
+	return &Logger{
+		Name:      name,
+		Sync:      true,
+		logger:    logger.Sugar(),
+		zapLogger: logger,
+	}
+}
+
+// NewCoreStd create a coreLogger with os.std
+func NewCoreStd(name string, op Option) *Logger {
+	zapCore := zapcore.NewCore(
+		coreEncoder(op.Encoding),
+		zapcore.AddSync(os.Stderr),
+		zap.NewAtomicLevel(),
+	)
+
+	logger := zap.New(zapCore, zap.AddCaller(), zap.AddCallerSkip(1))
+	return &Logger{
+		Name:      name,
+		Sync:      true,
+		logger:    logger.Sugar(),
+		zapLogger: logger,
+	}
+}
+
+// NewCoreRotate create a coreLogger with rotate
+func NewCoreRotate(name string, op Option) *Logger {
 	zapCore := zapcore.NewCore(
 		coreEncoder(op.Encoding),
 		zapcore.AddSync(wrapRotateCore(name, op.RotateOption)),

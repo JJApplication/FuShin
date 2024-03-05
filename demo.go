@@ -59,3 +59,28 @@ func Demo() {
 	go udsServer.Listen()
 	select {}
 }
+
+func DemoNoLogger() {
+	fmt.Printf("Copyright: %s\n", internal.COPYRIGHT)
+	fmt.Printf("Powered by: %s\n", internal.SITE)
+	fmt.Printf("Email: %s\n", internal.MAIL)
+
+	// init server
+	server := http.Server{
+		EnableLog: true,
+		Logger:    nil,
+		Debug:     false,
+		RegSignal: nil,
+		Address: http.Address{
+			Host: "0.0.0.0",
+			Port: 10086,
+		},
+		Headers: nil,
+		PProf:   false,
+	}
+
+	// try init all
+	server.Init()
+	go server.Listen()
+	select {}
+}

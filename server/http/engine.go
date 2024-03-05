@@ -44,8 +44,11 @@ type Server struct {
 	ReadTimeout  int                 // 继承http.Server
 	WriteTimeout int                 // 继承http.Server
 	IdleTimeout  int                 // 继承http.Server
-	// todo tls
-	PProf bool // 是否开启pprof 路径为"debug/pprof"
+	// tls support
+	Tls      bool   // 开启tls support
+	Certfile string // 证书
+	Keyfile  string // 私钥
+	PProf    bool   // 是否开启pprof 路径为"debug/pprof"
 }
 
 type Address struct {
@@ -93,6 +96,15 @@ func (s *Server) isInit() {
 	if !s.hasInit {
 		panic(ErrEngineEmpty)
 	}
+}
+
+// GetSrv 创建内置srv后的hook
+func (s *Server) GetSrv() *http.Server {
+	return s.srv
+}
+
+func (s *Server) GetTls() (string, string) {
+	return s.Certfile, s.Keyfile
 }
 
 // Init 在其他方法被调用前初始化
@@ -147,13 +159,41 @@ func (s *Server) Listen() error {
 		s.initMiddles()
 		s.initRoutes()
 		s.initServerConfig()
+		if s.Tls {
+			return s.srv.ListenAndServeTLS(s.Certfile, s.Keyfile)
+		}
 		return s.srv.ListenAndServe()
+	}
+}
+
+// ListenTLS SSL服务的语法糖
+func (s *Server) ListenTLS(cert, key string) error {
+	if s.engine == nil {
+		s.errorF("%s %s", moduleName, ErrEngineEmpty)
+		return errors.New(ErrEngineEmpty)
+	} else {
+		s.srv.Addr = fmt.Sprintf("%s:%d", s.Address.Host, s.Address.Port)
+		s.srv.Handler = s.engine
+		s.srv.ReadTimeout = time.Duration(s.ReadTimeout) * time.Second
+		s.srv.WriteTimeout = time.Duration(s.WriteTimeout) * time.Second
+		s.srv.IdleTimeout = time.Duration(s.IdleTimeout) * time.Second
+		s.srv.MaxHeaderBytes = s.MaxBodySize
+		s.RegSignals()
+		s.initRegSignals()
+		s.initMiddles()
+		s.initRoutes()
+		s.initServerConfig()
+		return s.srv.ListenAndServeTLS(cert, key)
 	}
 }
 
 // Run 不处理错误版本的listen
 func (s *Server) Run() {
 	_ = s.Listen()
+}
+
+func (s *Server) RunTLS(cert, key string) {
+	_ = s.ListenTLS(cert, key)
 }
 
 // ListenSmooth 平滑关闭
@@ -189,12 +229,22 @@ func (s *Server) ListenSmooth() {
 			}
 		}()
 
-		if err := s.srv.ListenAndServe(); err != nil {
-			if err == http.ErrServerClosed {
-				s.info(moduleName, ErrServerClosed)
-				return
+		if s.Tls {
+			if err := s.srv.ListenAndServeTLS(s.Certfile, s.Keyfile); err != nil {
+				if err == http.ErrServerClosed {
+					s.info(moduleName, ErrServerClosed)
+					return
+				}
+				s.errorF("%s %s", moduleName, err.Error())
 			}
-			s.errorF("%s %s", moduleName, err.Error())
+		} else {
+			if err := s.srv.ListenAndServe(); err != nil {
+				if err == http.ErrServerClosed {
+					s.info(moduleName, ErrServerClosed)
+					return
+				}
+				s.errorF("%s %s", moduleName, err.Error())
+			}
 		}
 	}
 }
