@@ -46,27 +46,27 @@ func (l *Logger) Init() error {
 	return nil
 }
 
-func (l Logger) Info(v ...interface{}) {
+func (l *Logger) Info(v ...interface{}) {
 	l.logger.Info(v...)
 }
 
-func (l Logger) InfoF(fmtStr string, v ...interface{}) {
+func (l *Logger) InfoF(fmtStr string, v ...interface{}) {
 	l.logger.Infof(fmtStr, v...)
 }
 
-func (l Logger) Warn(v ...interface{}) {
+func (l *Logger) Warn(v ...interface{}) {
 	l.logger.Warn(v...)
 }
 
-func (l Logger) WarnF(fmtStr string, v ...interface{}) {
+func (l *Logger) WarnF(fmtStr string, v ...interface{}) {
 	l.logger.Warnf(fmtStr, v...)
 }
 
-func (l Logger) Error(v ...interface{}) {
+func (l *Logger) Error(v ...interface{}) {
 	l.logger.Error(v...)
 }
 
-func (l Logger) ErrorF(fmtStr string, v ...interface{}) {
+func (l *Logger) ErrorF(fmtStr string, v ...interface{}) {
 	l.logger.Errorf(fmtStr, v...)
 }
 

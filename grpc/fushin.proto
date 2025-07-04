@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package config;
+
+option go_package = "fushin/grpc";
+
+service FushinGRPCService {
+    rpc HealthCheck(FushinRequest) returns (FushinResponse);
+    rpc Send(FushinRequest) returns (FushinResponse);
+    rpc Handle(FushinRequest) returns (FushinResponse);
+}
+
+enum DataFormat {
+    TEXT = 0;
+    BIN = 1;
+    JSON = 2;
+    YAML = 3;
+    TOML = 4;
+}
+
+enum Status {
+    SUCCESS = 0;
+    FAILED = 1;
+    TIMEOUT = 2;
+}
+
+// 统一消息体
+message FushinRequest {
+    string service = 1; // 标记服务名称
+    string receiver = 2; // 接收者 服务名称
+    int64 timestamp = 3; // 时间戳
+    bytes data = 4; // 携带的数据JSON
+    // 扩展特性
+    bool gzip = 5; // 需要压缩
+    bool no_ack = 6; // 无需响应
+    DataFormat format = 7; // 指定data的解析格式 默认JSON
+}
+
+message FushinResponse {
+    string service = 1; // 响应的服务名称
+    string receiver = 2; // 接收者 服务名称
+    int64 timestamp = 3; // 时间戳
+    bytes data = 4; // 携带的数据JSON
+    bytes error = 5; // 错误信息
+    Status status = 6; // 状态码
+}
